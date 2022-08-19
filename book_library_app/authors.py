@@ -1,5 +1,5 @@
 from book_library_app import app, db
-from webargs.flaskparser import use_args# parsuje i sprawdza poprawnosc przesłanych danych w zapytaniu HTTP, łaczymy go z pakietem marshmallow w celu walidacji naszych danych
+from webargs.flaskparser import use_args  # parsuje i sprawdza poprawnosc przesłanych danych w zapytaniu HTTP, łaczymy go z pakietem marshmallow w celu walidacji naszych danych
 from flask import jsonify, request    # request wyciąga informacje z ciała zapytania HTTP
 from book_library_app.models import Author, AuthorSchema, author_schema
 from book_library_app.utils import validate_json_content_type
@@ -47,14 +47,25 @@ def create_author(args: dict):
 @use_args(author_schema, error_status_code=400)    # # dekorator waliduje dane przesłane w zapytaniu HTTP z wykozystaniem klasy AuthorSchema i zwraca je w postaci słownika
 def update_author(args: dict, author_id: int):    # args przechowuje poprawnie zwalidowane dane z wykorzystaniem dekoratora @use_args
     author = Author.query.get_or_404(author_id, description=f'Author id: {author_id} not found')
+
+    author.first_name = args['first_name']
+    author.last_name = args['last_name']
+    author.birth_date = args['birth_date']
+
+    db.session.commit()
+
     return jsonify({
         'success': True,
-        'data': f'Author id: {author_id} has been updated'
+        'data': author_schema.dump(author)
     })
 
 
 @app.route('/api/v1/authors/<int:author_id>', methods=['DELETE'])   # jesli pominiemy argument methods to Flask domyslnie ustawi methods na GET
 def delete_author(author_id: int):
+    author = Author.query.get_or_404(author_id, description=f'Author id: {author_id} not found')
+
+    db.session.delete(author)
+    db.session.commit()
     return jsonify({
         'success': True,
         'data': f'Author id: {author_id} has been deleted'
