@@ -11,6 +11,7 @@ load_dotenv(env_file)    # ładuje nam ustawienia z pliku przekazengo w argumenc
 
 
 class Config:    # klasa przechowująca ustawienia aplikacji, wartosci przechowujemy w atrybutach
+    PER_PAGE = 5
     SECRET_KEY = os.environ.get('SECRET_KEY')    # moduł os wyciaga zmienna srodowiskowa SECRET_KEY
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

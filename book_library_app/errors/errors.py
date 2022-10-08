@@ -1,5 +1,6 @@
 from flask import Response, jsonify
 from book_library_app import app, db
+from book_library_app.errors import errors_bp
 # import instancji klasy flask
 
 # w przypadku wystapienia jakiegokolwiek błedu chcemy zwracac zawsze ten sam jego format
@@ -21,23 +22,23 @@ class ErrorResponse:
         return response
 
 
-@app.errorhandler(404)    # do tej metody mozemy podac kod odpowiedzi albo rzucony wyjątek
+@errors_bp.errorhandler(404)    # do tej metody mozemy podac kod odpowiedzi albo rzucony wyjątek
 def not_found_error(err):    # funkcja bedzie odpalana w momencie wystapienia tego kodu odpowiedzi
     return ErrorResponse(err.description, 404).to_response()    # to_response przekształca ta instancje na obiekt typu response
 
 
-@app.errorhandler(400)
+@errors_bp.errorhandler(400)
 def bad_request_error(err):
     messages = err.data.get('messages', {}).get('json', {})
     return ErrorResponse(messages, 400).to_response()
 
 
-@app.errorhandler(415)
+@errors_bp.errorhandler(415)
 def unsupported_media_type_error(err):
     return ErrorResponse(err.description, 415).to_response()
 
 
-@app.errorhandler(500)
+@errors_bp.errorhandler(500)
 def internal_server_error(err):
     db.session.rollback()    # metoda czysci sesje
     return ErrorResponse(err.description, 500).to_response()
